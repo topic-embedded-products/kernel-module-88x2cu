@@ -133,6 +133,7 @@ CONFIG_MP_VHT_HW_TX_MODE = n
 #################### Alibaba Zeroconfig #######################
 CONFIG_ALIBABA_ZEROCONFIG = n
 ###################### Platform Related #######################
+CONFIG_PLATFORM_OPENEMBEDDED = y
 CONFIG_PLATFORM_I386_PC = n
 CONFIG_PLATFORM_ANDROID_X86 = n
 CONFIG_PLATFORM_ANDROID_INTEL_X86 = n
@@ -1269,7 +1270,6 @@ endif
 ifeq ($(CONFIG_RTW_IOT_CCK_PD_INIT), y)
 EXTRA_CFLAGS += -DCONFIG_RTW_IOT_CCK_PD_INIT
 endif
-
 ifeq ($(CONFIG_MP_VHT_HW_TX_MODE), y)
 EXTRA_CFLAGS += -DCONFIG_MP_VHT_HW_TX_MODE
 ifeq ($(CONFIG_PLATFORM_I386_PC), y)
@@ -1308,11 +1308,21 @@ EXTRA_CFLAGS += -DCONFIG_ALIBABA_ZEROCONFIG_DBG
 EXTRA_CFLAGS += -DCONFIG_TDMADIG
 endif
 
+# Openembedded already provides what we need, in KERNEL_VERSION and KERNEL_SRC
+ifeq ($(CONFIG_PLATFORM_OPENEMBEDDED), y)
+KERNEL_VERSION ?= $(shell uname -r)
+KERNEL_SRC ?= "/lib/modules/$(KERNEL_VERSION)/build"
+KVER = $(KERNEL_VERSION)
+KSRC = $(KERNEL_SRC)
+# Won't compile without these defines, so better hope your platform is little-endian
+EXTRA_CFLAGS += -DCONFIG_LITTLE_ENDIAN
+EXTRA_CFLAGS += -DCONFIG_IOCTL_CFG80211 -DRTW_USE_CFG80211_STA_EVENT
+endif
+
 ifeq ($(CONFIG_RTW_MBO), y)
 EXTRA_CFLAGS += -DCONFIG_RTW_MBO -DCONFIG_RTW_80211K -DCONFIG_RTW_WNM -DCONFIG_RTW_BTM_ROAM
 EXTRA_CFLAGS += -DCONFIG_RTW_80211R
 endif
-
 ifeq ($(CONFIG_PLATFORM_I386_PC), y)
 EXTRA_CFLAGS += -DCONFIG_LITTLE_ENDIAN
 EXTRA_CFLAGS += -DCONFIG_IOCTL_CFG80211 -DRTW_USE_CFG80211_STA_EVENT
@@ -2411,8 +2421,15 @@ export CONFIG_RTL8822CU = m
 
 all: modules
 
+ifeq ($(CONFIG_PLATFORM_OPENEMBEDDED), y)
+modules:
+	$(MAKE) -C $(KSRC) M=$(PWD) modules
+modules_install:
+	$(MAKE) -C $(KSRC) M=$(PWD) modules_install
+else
 modules:
 	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KSRC) M=$(shell pwd)  modules
+endif
 
 strip:
 	$(CROSS_COMPILE)strip $(MODULE_NAME).ko --strip-unneeded

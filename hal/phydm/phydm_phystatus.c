@@ -2308,6 +2308,7 @@ void phydm_rx_physts_jgr3(void *dm_void, u8 *phy_sts,
 	case 4:
 		phydm_get_physts_ofdm_cmn_jgr3(dm, phy_sts, pktinfo, phy_info);
 		phydm_get_physts_4_others_jgr3(dm, phy_sts, pktinfo, phy_info);
+		break;
 	case 5:
 		phydm_get_physts_ofdm_cmn_jgr3(dm, phy_sts, pktinfo, phy_info);
 		phydm_get_physts_5_others_jgr3(dm, phy_sts, pktinfo, phy_info);
@@ -3108,8 +3109,7 @@ void phydm_physts_dbg(void *dm_void, char input[][16], u32 *_used,
 	u8 i = 0;
 
 	for (i = 0; i < 3; i++) {
-		if (input[i + 1])
-			PHYDM_SSCANF(input[i + 1], DCMD_DECIMAL, &var[i]);
+		PHYDM_SSCANF(input[i + 1], DCMD_DECIMAL, &var[i]);
 	}
 
 	if ((strcmp(input[1], help) == 0)) {

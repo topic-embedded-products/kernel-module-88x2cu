@@ -3026,6 +3026,10 @@ static int rtw_cfg80211_set_probe_req_wpsp2pie(_adapter *padapter, char *buf, in
 				return -EINVAL;
 		}
 		#endif /* CONFIG_WFD */
+
+		#ifdef CONFIG_RTW_MBO
+		rtw_mbo_update_ie_data(padapter, buf, len);
+		#endif
 	}
 
 	return ret;
@@ -4202,7 +4206,7 @@ static int cfg80211_rtw_connect(struct wiphy *wiphy, struct net_device *ndev,
 		sme->privacy, sme->key, sme->key_len, sme->key_idx, sme->auth_type);
 
 	if (rtw_check_connect_sae_compat(sme)) {
-		sme->auth_type = MLME_AUTHTYPE_SAE;
+		sme->auth_type = (enum nl80211_auth_type)MLME_AUTHTYPE_SAE;
 		psecuritypriv->auth_type = MLME_AUTHTYPE_SAE;
 		psecuritypriv->auth_alg = WLAN_AUTH_SAE;
 		RTW_INFO("%s set sme->auth_type for SAE compat\n", __FUNCTION__);
@@ -4400,6 +4404,10 @@ static int cfg80211_rtw_connect(struct wiphy *wiphy, struct net_device *ndev,
 	rtw_set_802_11_authentication_mode(padapter, authmode);
 
 	/* rtw_set_802_11_encryption_mode(padapter, padapter->securitypriv.ndisencryptstatus); */
+
+#ifdef CONFIG_RTW_MBO
+	rtw_mbo_update_ie_data(padapter, (u8 *)sme->ie, sme->ie_len);
+#endif
 
 	if (rtw_set_802_11_connect(padapter, (u8 *)sme->bssid, &ndis_ssid, \
 			sme->channel ? sme->channel->hw_value : 0) == _FALSE) {
@@ -6336,7 +6344,7 @@ static void rtw_get_chbwoff_from_cfg80211_chan_def(
 	switch (chandef->width) {
 	case NL80211_CHAN_WIDTH_20_NOHT:
 		*ht = 0;
-		/* passthrought */
+		/* fall through */
 	case NL80211_CHAN_WIDTH_20:
 		*bw = CHANNEL_WIDTH_20;
 		*offset = HAL_PRIME_CHNL_OFFSET_DONT_CARE;

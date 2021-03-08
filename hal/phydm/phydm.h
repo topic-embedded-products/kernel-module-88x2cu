@@ -211,6 +211,8 @@ extern const u16	phy_rate_table[84];
 #define		dm_type_by_fw		0
 #define		dm_type_by_driver	1
 
+#define		HW_IGI_TXINFO_TABLE_SIZE 64
+
 #ifdef BB_RAM_SUPPORT
 
 struct phydm_bb_ram_per_sta {
@@ -230,7 +232,7 @@ struct phydm_bb_ram_per_sta {
 
 struct phydm_bb_ram_ctrl {
 	/*@ For 98F/14B/22C/12F, each tx_pwr_ofst step will be 1dB*/
-	struct phydm_bb_ram_per_sta pram_sta_ctrl[ODM_ASSOCIATE_ENTRY_NUM];
+	struct phydm_bb_ram_per_sta pram_sta_ctrl[HW_IGI_TXINFO_TABLE_SIZE];
 	/*------------ For table2 do not set power offset by macid --------*/
 	/* For type == 2'b10, 0x1e70[22:16] = tx_pwr_offset_reg0, 0x1e70[23] = enable */
 	boolean			tx_pwr_ofst_reg0_en;
@@ -719,6 +721,7 @@ struct	phydm_iot_center {
 	boolean			patch_id_100f0401;
 	boolean			patch_id_10120200;
 	boolean			patch_id_021f0800;
+	boolean			patch_id_011f0500;
 	u32			phydm_patch_id;		/*temp for CCX IOT */
 };
 

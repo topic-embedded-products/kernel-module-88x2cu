@@ -116,6 +116,9 @@ void halrf_tssi_get_kfree_efuse_8822c(
 void halrf_tssi_set_de_for_tx_verify_8822c(
 	void *dm_void, u32 tssi_de, u8 path);
 
+void halrf_enable_tssi_scan_8822c(
+	void *dm_void);
+
 void halrf_enable_tssi_8822c(
 	void *dm_void);
 
@@ -129,6 +132,9 @@ void halrf_do_tssi_scan_8822c(
 	void *dm_void);
 
 void halrf_tssi_scan_set_tssi_setting_8822c(
+	void *dm_void);
+
+void halrf_tssi_period_txagc_offset_8822c(
 	void *dm_void);
 
 void halrf_tssi_scan_save_txagc_offset_8822c(

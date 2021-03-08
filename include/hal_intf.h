@@ -452,6 +452,9 @@ struct hal_ops {
 #ifdef CONFIG_PCI_TX_POLLING
 	void (*tx_poll_handler)(_adapter *adapter);
 #endif
+#ifdef CONFIG_SUPPORT_DYNAMIC_TXPWR
+	void (*dtp_macid_set)(_adapter *padapter, u8 opmode, u8 mac_id, u8 *paddr);
+#endif
 };
 
 typedef	enum _RT_EEPROM_TYPE {
@@ -842,6 +845,9 @@ s32 rtw_hal_macid_wakeup(_adapter *adapter, u8 macid);
 s32 rtw_hal_macid_sleep_all_used(_adapter *adapter);
 s32 rtw_hal_macid_wakeup_all_used(_adapter *adapter);
 
+s32 rtw_hal_macid_drop(_adapter *adapter, u8 macid);
+s32 rtw_hal_macid_undrop(_adapter *adapter, u8 macid);
+
 s32 rtw_hal_fill_h2c_cmd(PADAPTER padapter, u8 ElementID, u32 CmdLen, u8 *pCmdBuffer);
 void rtw_hal_fill_fake_txdesc(_adapter *padapter, u8 *pDesc, u32 BufferLen,
 			      u8 IsPsPoll, u8 IsBTQosNull, u8 bDataFrame);
@@ -883,6 +889,10 @@ s32 rtw_hal_fw_mem_dl(_adapter *padapter, enum fw_mem mem);
 
 #ifdef CONFIG_RFKILL_POLL
 bool rtw_hal_rfkill_poll(_adapter *adapter, u8 *valid);
+#endif
+
+#ifdef CONFIG_SUPPORT_DYNAMIC_TXPWR
+void rtw_hal_dtp_macid_set(_adapter *padapter, u8 opmode, u8 mac_id, u8 *paddr);
 #endif
 
 #endif /* __HAL_INTF_H__ */

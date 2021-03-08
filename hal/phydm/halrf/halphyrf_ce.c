@@ -188,6 +188,9 @@ void odm_get_tracking_table(void *dm_void, u8 thermal_value, u8 delta)
 
 	configure_txpower_track(dm, &c);
 
+	if (*c.get_delta_swing_table == NULL)
+		return;
+
 	(*c.get_delta_swing_table)(dm,
 				   (u8 **)&pwrtrk_tab_up_a,
 				   (u8 **)&pwrtrk_tab_down_a,
@@ -372,6 +375,9 @@ void odm_pwrtrk_method(void *dm_void)
 	struct txpwrtrack_cfg c = {0};
 
 	configure_txpower_track(dm, &c);
+
+	if (c.odm_tx_pwr_track_set_pwr == NULL)
+		return;
 
 	if (dm->support_ic_type &
 		(ODM_RTL8188E | ODM_RTL8192E | ODM_RTL8821 | ODM_RTL8812 |

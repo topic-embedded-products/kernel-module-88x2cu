@@ -492,6 +492,8 @@ static void init_phydm_cominfo(PADAPTER adapter)
 	odm_cmn_info_init(p_dm_odm, ODM_CMNINFO_CUT_VER, cut_ver);
 	odm_cmn_info_init(p_dm_odm, ODM_CMNINFO_DIS_DPD
 		, hal->txpwr_pg_mode == TXPWR_PG_WITH_PWR_IDX ? _TRUE : _FALSE);
+	odm_cmn_info_init(p_dm_odm, ODM_CMNINFO_TSSI_ENABLE
+		, hal->txpwr_pg_mode == TXPWR_PG_WITH_TSSI_OFFSET ? _TRUE : _FALSE);
 }
 
 void rtl8822c_phy_init_dm_priv(PADAPTER adapter)
@@ -920,6 +922,13 @@ static void mac_switch_bandwidth(PADAPTER adapter, u8 pri_ch_idx)
 
 	channel = hal->current_channel;
 	bw = hal->current_channel_bw;
+#ifdef CONFIG_NARROWBAND_SUPPORTING
+	if (adapter->registrypriv.rtw_nb_config == RTW_NB_CONFIG_WIDTH_10)
+		err = rtw_halmac_set_bandwidth(adapter_to_dvobj(adapter), channel, pri_ch_idx, CHANNEL_WIDTH_10);
+	else if (adapter->registrypriv.rtw_nb_config == RTW_NB_CONFIG_WIDTH_5)
+		err = rtw_halmac_set_bandwidth(adapter_to_dvobj(adapter), channel, pri_ch_idx, CHANNEL_WIDTH_5);
+	else
+#endif
 	err = rtw_halmac_set_bandwidth(adapter_to_dvobj(adapter), channel, pri_ch_idx, bw);
 	if (err) {
 		RTW_INFO(FUNC_ADPT_FMT ": (channel=%d, pri_ch_idx=%d, bw=%d) fail\n",

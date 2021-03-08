@@ -87,7 +87,7 @@ void odm_tx_pwr_track_set_pwr8822c(void *dm_void, enum pwrtrack_method method,
 	if (method == CLEAN_MODE) { /*use for mp driver clean power tracking status*/
 		RF_DBG(dm, DBG_RF_TX_PWR_TRACK, "===> %s method=%d clear power tracking rf_path=%d\n",
 		       __func__, method, rf_path);
-		tssi->tssi_trk_txagc_offset[rf_path] = 0;
+		tssi->power_track_offset[rf_path] = 0;
 
 		switch (rf_path) {
 		case RF_PATH_A:
@@ -139,6 +139,18 @@ void odm_tx_pwr_track_set_pwr8822c(void *dm_void, enum pwrtrack_method method,
 		default:
 			break;
 		}	
+	} else if (method == TSSI_MODE) {
+		if (*dm->mp_mode != 1) {
+			RF_DBG(dm, DBG_RF_TX_PWR_TRACK, "===> %s method=%d Enter TSSI Period Mode\n",
+				__func__, method);
+  
+			RF_DBG(dm, DBG_RF_TX_PWR_TRACK,
+				"dm->is_scan_in_process=%d   dm->is_linked=%d   rf->is_tssi_in_progress=%d\n",
+				*dm->is_scan_in_process, dm->is_linked, rf->is_tssi_in_progress);
+  
+			if (!*dm->is_scan_in_process && dm->is_linked && !rf->is_tssi_in_progress)
+				halrf_tssi_period_txagc_offset_8822c(dm);
+		}
 	}
 }
 

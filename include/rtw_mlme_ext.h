@@ -660,6 +660,7 @@ void change_band_update_ie(_adapter *padapter, WLAN_BSSID_EX *pnetwork, u8 ch);
 
 void Set_MSR(_adapter *padapter, u8 type);
 
+
 void rtw_set_external_auth_status(_adapter *padapter, const void *data, int len);
 
 u8 rtw_get_oper_ch(_adapter *adapter);
@@ -755,6 +756,7 @@ int rtw_update_bcn_keys_of_network(struct wlan_network *network);
 
 int validate_beacon_len(u8 *pframe, uint len);
 void rtw_dump_bcn_keys(void *sel, struct beacon_keys *recv_beacon);
+void rtw_bcn_key_err_fix(struct beacon_keys *cur, struct beacon_keys *recv);
 bool rtw_bcn_key_compare(struct beacon_keys *cur, struct beacon_keys *recv);
 int rtw_check_bcn_info(ADAPTER *Adapter, u8 *pframe, u32 packet_len);
 void update_beacon_info(_adapter *padapter, u8 *pframe, uint len, struct sta_info *psta);
@@ -808,6 +810,7 @@ u8 rtw_get_sec_camid(_adapter *adapter, u8 max_bk_key_num, u8 *sec_key_id);
 
 struct macid_bmp;
 struct macid_ctl_t;
+bool _rtw_macid_ctl_chk_cap(_adapter *adapter, u8 cap);
 void dump_macid_map(void *sel, struct macid_bmp *map, u8 max_num);
 bool rtw_macid_is_set(struct macid_bmp *map, u8 id);
 void rtw_macid_map_clr(struct macid_bmp *map, u8 id);
@@ -827,8 +830,10 @@ void rtw_macid_ctl_set_rate_bmp0(struct macid_ctl_t *macid_ctl, u8 id, u32 bmp);
 void rtw_macid_ctl_set_rate_bmp1(struct macid_ctl_t *macid_ctl, u8 id, u32 bmp);
 #ifdef CONFIG_PROTSEL_MACSLEEP
 void rtw_macid_ctl_init_sleep_reg(struct macid_ctl_t *macid_ctl, u16 reg_ctrl, u16 reg_info);
+void rtw_macid_ctl_init_drop_reg(struct macid_ctl_t *macid_ctl, u16 reg_ctrl, u16 reg_info);
 #else
 void rtw_macid_ctl_init_sleep_reg(struct macid_ctl_t *macid_ctl, u16 m0, u16 m1, u16 m2, u16 m3);
+void rtw_macid_ctl_init_drop_reg(struct macid_ctl_t *macid_ctl, u16 m0, u16 m1, u16 m2, u16 m3);
 #endif
 void rtw_macid_ctl_init(struct macid_ctl_t *macid_ctl);
 void rtw_macid_ctl_deinit(struct macid_ctl_t *macid_ctl);
@@ -976,38 +981,11 @@ unsigned int OnAction_p2p(_adapter *padapter, union recv_frame *precv_frame);
 unsigned int OnAction_tbtx_token(_adapter *padapter, union recv_frame *precv_frame);
 #endif
 
-#ifdef CONFIG_RTW_80211R
-void rtw_ft_update_bcn(_adapter *padapter, union recv_frame *precv_frame);
-void rtw_ft_start_clnt_join(_adapter *padapter);
-u8 rtw_ft_update_rsnie(_adapter *padapter, u8 bwrite, 
-	struct pkt_attrib *pattrib, u8 **pframe);
-void rtw_ft_build_auth_req_ies(_adapter *padapter, 
-	struct pkt_attrib *pattrib, u8 **pframe);
-void rtw_ft_build_assoc_req_ies(_adapter *padapter, 
-	u8 is_reassoc, struct pkt_attrib *pattrib, u8 **pframe);
-u8 rtw_ft_update_auth_rsp_ies(_adapter *padapter, u8 *pframe, u32 len);
-void rtw_ft_start_roam(_adapter *padapter, u8 *pTargetAddr);
-void rtw_ft_issue_action_req(_adapter *padapter, u8 *pTargetAddr);
-void rtw_ft_report_evt(_adapter *padapter);
-void rtw_ft_report_reassoc_evt(_adapter *padapter, u8 *pMacAddr);
-void rtw_ft_link_timer_hdl(void *ctx);
-void rtw_ft_roam_timer_hdl(void *ctx);
-void rtw_ft_roam_status_reset(_adapter *padapter);
-#endif
 #ifdef CONFIG_RTW_TOKEN_BASED_XMIT
 void rtw_issue_action_token_req(_adapter *padapter, struct sta_info *pstat);
 void rtw_issue_action_token_rel(_adapter *padapter);
 #endif
-#ifdef CONFIG_RTW_WNM
-void rtw_wnm_roam_scan_hdl(void *ctx);
-void rtw_wnm_process_btm_req(_adapter *padapter,  u8* pframe, u32 frame_len);
-void rtw_wnm_reset_btm_candidate(struct roam_nb_info *pnb);
-void rtw_wnm_reset_btm_state(_adapter *padapter);
-void rtw_wnm_issue_action(_adapter *padapter, u8 action, u8 reason);
-#endif
-#if defined(CONFIG_RTW_WNM) || defined(CONFIG_RTW_80211K)
-u32 rtw_wnm_btm_candidates_survey(_adapter *padapter, u8* pframe, u32 elem_len, u8 is_preference);
-#endif
+
 void mlmeext_joinbss_event_callback(_adapter *padapter, int join_res);
 void mlmeext_sta_del_event_callback(_adapter *padapter);
 void mlmeext_sta_add_event_callback(_adapter *padapter, struct sta_info *psta);

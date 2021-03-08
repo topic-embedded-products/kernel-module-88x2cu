@@ -121,7 +121,6 @@ u8 beamforming_get_htndp_tx_rate(void *dm_void, u8 bfer_str_num)
 	if (dm->support_ic_type & ODM_RTL8814A)
 		nr_index = tx_bf_nr(hal_txbf_8814a_get_ntx(dm), bfer_str_num);
 	else
-#endif
 		nr_index = tx_bf_nr(1, bfer_str_num);
 
 	switch (nr_index) {
@@ -141,6 +140,9 @@ u8 beamforming_get_htndp_tx_rate(void *dm_void, u8 bfer_str_num)
 		ndp_tx_rate = ODM_MGN_MCS8;
 		break;
 	}
+#else
+	ndp_tx_rate = ODM_MGN_MCS8;
+#endif
 
 	return ndp_tx_rate;
 }
@@ -155,7 +157,6 @@ u8 beamforming_get_vht_ndp_tx_rate(void *dm_void, u8 bfer_str_num)
 	if (dm->support_ic_type & ODM_RTL8814A)
 		nr_index = tx_bf_nr(hal_txbf_8814a_get_ntx(dm), bfer_str_num);
 	else
-#endif
 		nr_index = tx_bf_nr(1, bfer_str_num);
 
 	switch (nr_index) {
@@ -175,6 +176,9 @@ u8 beamforming_get_vht_ndp_tx_rate(void *dm_void, u8 bfer_str_num)
 		ndp_tx_rate = ODM_MGN_VHT2SS_MCS0;
 		break;
 	}
+#else
+	ndp_tx_rate = ODM_MGN_VHT2SS_MCS0;
+#endif
 
 	return ndp_tx_rate;
 }
@@ -686,8 +690,7 @@ void phydm_bf_debug(void *dm_void, char input[][16], u32 *_used, char *output,
 		return;
 	}
 	for (i = 0; i < 3; i++) {
-		if (input[i + 1])
-			PHYDM_SSCANF(input[i + 1], DCMD_DECIMAL, &var1[i]);
+		PHYDM_SSCANF(input[i + 1], DCMD_DECIMAL, &var1[i]);
 	}
 	if (var1[0] == 0) {
 		#if (DM_ODM_SUPPORT_TYPE & (ODM_WIN | ODM_CE))

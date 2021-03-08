@@ -114,6 +114,9 @@ enum h2c_cmd {
 #ifdef CONFIG_FW_HANDLE_TXBCN
 	H2C_FW_BCN_OFFLOAD = 0xBA,
 #endif
+#ifdef CONFIG_SUPPORT_DYNAMIC_TXPWR
+	H2C_FW_CRC5_SEARCH = 0xBB,
+#endif
 	H2C_RESET_TSF = 0xC0,
 #ifdef CONFIG_FW_CORRECT_BCN
 	H2C_BCNHWSEQ = 0xC5,
@@ -193,6 +196,10 @@ enum h2c_cmd {
 
 #define H2C_SINGLE_CHANNELSWITCH_V2_LEN 2
 #define H2C_BT_UNKNOWN_DEVICE_WA_LEN 1
+
+#ifdef CONFIG_SUPPORT_DYNAMIC_TXPWR
+#define H2C_FW_CRC5_SEARCH_LEN	7
+#endif
 
 #define eq_mac_addr(a, b)						(((a)[0] == (b)[0] && (a)[1] == (b)[1] && (a)[2] == (b)[2] && (a)[3] == (b)[3] && (a)[4] == (b)[4] && (a)[5] == (b)[5]) ? 1 : 0)
 #define cp_mac_addr(des, src)					((des)[0] = (src)[0], (des)[1] = (src)[1], (des)[2] = (src)[2], (des)[3] = (src)[3], (des)[4] = (src)[4], (des)[5] = (src)[5])

@@ -480,7 +480,8 @@ enum halrf_cmninfo_init {
 	HALRF_CMNINFO_IQK_TIMES,
 	HALRF_CMNINFO_MP_POWER_TRACKING_TYPE,
 	HALRF_CMNINFO_POWER_TRACK_CONTROL,
-	HALRF_CMNINFO_TSSI_RETRY_SPECIAL_SCAN
+	HALRF_CMNINFO_TSSI_RETRY_SPECIAL_SCAN,
+	HALRF_CMNINFO_TSSI_SPECIAL_SCAN
 };
 
 enum halrf_cmninfo_hook {
@@ -535,9 +536,17 @@ struct _halrf_tssi_data {
 	s8 txagc_offset[PHYDM_MAX_RF_PATH][TSSI_CHANNEL_NUM];
 	u8 tssi_thermal[PHYDM_MAX_RF_PATH];
 	u8 retry_sacan_tssi;
+	u8 tssi_special_scan;
 	u8 special_scan_num;
 	u8 connect_ch_num;
 	u32 tssi_dck[4][PHYDM_MAX_RF_PATH];
+	u32 tssi_dck_connect_bk[PHYDM_MAX_RF_PATH];
+	s8 tssi_txagc_offset[PHYDM_MAX_RF_PATH][80];
+	u8 tssi_txagc_offset_counter_a;
+	u8 tssi_txagc_offset_counter_b;
+	u8 tssi_txagc_offset_check_a;
+	u8 tssi_txagc_offset_check_b;
+	u8 tssi_txagc_offset_return;
 };
 
 struct _halrf_txgapk_info {
@@ -729,6 +738,8 @@ void halrf_do_tssi(void *dm_void);
 
 void halrf_do_tssi_scan(void *dm_void);
 
+void halrf_tssi_period_txagc_offset(void *dm_void);
+
 void halrf_tssi_set_tssi_tx_counter(void *dm_void, u8 special_scan_num,
 	u8 connect_ch_num);
 
@@ -759,6 +770,8 @@ void halrf_tssi_scan_reload_txagc_offset(void *dm_void);
 void halrf_tssi_lps_get_txagc_offset(void *dm_void, u8 *txagc_offset);
 
 void halrf_enable_tssi(void *dm_void);
+
+void halrf_enable_tssi_scan(void *dm_void);
 
 void halrf_disable_tssi(void *dm_void);
 

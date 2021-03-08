@@ -810,8 +810,7 @@ void halrf_support_ability_debug(void *dm_void, char input[][16], u32 *_used,
 	u8 i;
 
 	for (i = 0; i < 5; i++)
-		if (input[i + 1])
-			PHYDM_SSCANF(input[i + 2], DCMD_DECIMAL, &dm_value[i]);
+		PHYDM_SSCANF(input[i + 2], DCMD_DECIMAL, &dm_value[i]);
 
 	if (dm_value[0] == 100) {
 		PDM_SNPF(out_len, used, output + used, out_len - used,
@@ -1045,6 +1044,9 @@ u64 halrf_cmn_info_get(void *dm_void, u32 cmn_info)
 #endif
 	case HALRF_CMNINFO_TSSI_RETRY_SPECIAL_SCAN:
 		return_value = tssi->retry_sacan_tssi;
+		break;
+	case HALRF_CMNINFO_TSSI_SPECIAL_SCAN:
+		return_value = tssi->tssi_special_scan;
 		break;
 	default:
 		/* do nothing */
@@ -1465,7 +1467,7 @@ void halrf_rfk_handshake(void *dm_void, boolean is_before_k)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 
-	if (*dm->mp_mode)
+	if (dm->mp_mode && (*dm->mp_mode))
 		return;
 
 	switch (dm->support_ic_type) {
@@ -3402,6 +3404,17 @@ void halrf_do_tssi_scan(void *dm_void)
 #endif
 }
 
+void halrf_tssi_period_txagc_offset(
+	void *dm_void)
+{
+	struct dm_struct *dm = (struct dm_struct *)dm_void;
+
+#if (RTL8822C_SUPPORT == 1)
+	if (dm->support_ic_type == ODM_RTL8822C)
+		halrf_tssi_period_txagc_offset_8822c(dm);
+#endif
+}
+
 void halrf_tssi_set_tssi_tx_counter(void *dm_void, u8 special_scan_num,
 	u8 connect_ch_num)
 {
@@ -3590,6 +3603,17 @@ void halrf_enable_tssi(
 #if (RTL8822C_SUPPORT == 1)
 	if (dm->support_ic_type & ODM_RTL8822C)
 		halrf_enable_tssi_8822c(dm);
+#endif
+}
+
+void halrf_enable_tssi_scan(
+	void *dm_void)
+{
+	struct dm_struct *dm = (struct dm_struct *)dm_void;
+
+#if (RTL8822C_SUPPORT == 1)
+	if (dm->support_ic_type & ODM_RTL8822C)
+		halrf_enable_tssi_scan_8822c(dm);
 #endif
 }
 
@@ -3816,7 +3840,7 @@ void halrf_tssi_trigger(void *dm_void)
 			return;
 		}
 	} else {
-		if (rf->power_track_type >= 0 && rf->power_track_type <= 3) {
+		if (rf->power_track_type <= 3) {
 			RF_DBG(dm, DBG_RF_TX_PWR_TRACK,
 				"[TSSI]======>%s Normal Mode efues is thermal tracking. return !!!\n", __func__);
 			return;
@@ -3925,8 +3949,7 @@ void halrf_dump_rfk_reg(void *dm_void, char input[][16], u32 *_used,
 
 	reg_1b00 = odm_get_bb_reg(dm, R_0x1b00, MASKDWORD);
 
-	if (input[2])
-		PHYDM_SSCANF(input[2], DCMD_DECIMAL, &var1[0]);
+	PHYDM_SSCANF(input[2], DCMD_DECIMAL, &var1[0]);
 
 	if ((strcmp(input[2], help) == 0))
 		PDM_SNPF(out_len, used, output + used, out_len - used,

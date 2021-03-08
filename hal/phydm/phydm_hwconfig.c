@@ -426,7 +426,10 @@ odm_config_rf_with_header_file(struct dm_struct *dm,
 			else if (e_rf_path == RF_PATH_B)
 				READ_AND_CONFIG_MP(8822c, _radiob);
 		} else if (config_type == CONFIG_RF_TXPWR_LMT) {
-			READ_AND_CONFIG_MP(8822c, _txpwr_lmt);
+			if (dm->rfe_type == 5)
+				READ_AND_CONFIG_MP(8822c, _txpwr_lmt_type5);
+			else
+				READ_AND_CONFIG_MP(8822c, _txpwr_lmt);
 		}
 	}
 #endif

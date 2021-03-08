@@ -4161,5 +4161,9 @@ void rtl8822c_set_hal_ops(PADAPTER adapter)
 	ops->init_mac_register = rtl8822c_phy_init_mac_register;
 	ops->init_phy = rtl8822c_phy_init;
 	ops->reqtxrpt = rtl8822c_req_txrpt_cmd;
+
+#ifdef CONFIG_SUPPORT_DYNAMIC_TXPWR
+	ops->dtp_macid_set = rtl8822c_dtp_macid_set;
+#endif
 }
 

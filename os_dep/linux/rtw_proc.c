@@ -4468,9 +4468,12 @@ const struct rtw_proc_hdl adapter_proc_hdls[] = {
 	RTW_PROC_HDL_SSEQ("roam_param", proc_get_roam_param, proc_set_roam_param),
 	RTW_PROC_HDL_SSEQ("roam_tgt_addr", NULL, proc_set_roam_tgt_addr),
 #endif /* CONFIG_LAYER2_ROAMING */
-
+#ifdef CONFIG_RTW_MBO
+	RTW_PROC_HDL_SSEQ("non_pref_ch", rtw_mbo_proc_non_pref_chans_get, rtw_mbo_proc_non_pref_chans_set),
+	RTW_PROC_HDL_SSEQ("cell_data", rtw_mbo_proc_cell_data_get, rtw_mbo_proc_cell_data_set),
+#endif
 #ifdef CONFIG_RTW_80211R
-	RTW_PROC_HDL_SSEQ("ft_flags", proc_get_ft_flags, proc_set_ft_flags),
+	RTW_PROC_HDL_SSEQ("ft_flags", rtw_ft_proc_flags_get, rtw_ft_proc_flags_set),
 #endif
 	RTW_PROC_HDL_SSEQ("defs_param", proc_get_defs_param, proc_set_defs_param),
 #ifdef CONFIG_SDIO_HCI

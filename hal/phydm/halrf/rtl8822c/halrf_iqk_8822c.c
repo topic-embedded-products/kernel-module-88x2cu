@@ -548,10 +548,10 @@ void _iqk_set_gnt_wl_high_8822c(struct dm_struct *dm)
 void _iqk_set_gnt_bt_low_8822c(struct dm_struct *dm)
 {
 	u32 val = 0;
-	u8 state = 0x0, sw_control = 0x1;
+	u8 state = 0x0;
 
 	/*GNT_BT = 0*/
-	val = (sw_control) ? ((state << 1) | 0x1) : 0;
+	val = (state << 1) | 0x1;
 	_iqk_btc_write_indirect_reg_8822c(dm, 0x38, 0xc000, val); /*0x38[15:14]*/
 	_iqk_btc_write_indirect_reg_8822c(dm, 0x38, 0x0c00, val); /*0x38[11:10]*/
 }
@@ -3532,7 +3532,7 @@ _iqk_rx_iqk_gain_search_fail_8822c(
 	boolean fail = true, k2fail = true;
 	u32 IQK_CMD = 0x0, rf_reg0 = 0x0, tmp = 0x0, bb_idx = 0x0;
 	u8 IQMUX[5] = {0x9, 0x12, 0x1b, 0x24, 0x24};
-	u8 idx;
+	u8 idx = 0;
 
 	RF_DBG(dm, DBG_RF_IQK, "[IQK]============ S%d RXIQK GainSearch ============\n", path);
 
@@ -3551,8 +3551,10 @@ _iqk_rx_iqk_gain_search_fail_8822c(
 			if (iqk->tmp1bcc == IQMUX[idx])
 				break;
 		}
-		if (idx == 4)
-			RF_DBG(dm, DBG_RF_IQK, "[IQK] rx_gs overflow\n");
+		if (idx == 4) {
+			RF_DBG(dm, DBG_RF_IQK, "[IQK] rx_gs overflow, set idx=3\n");
+			idx = 0;
+		}
 
 		odm_write_4byte(dm, 0x1b00, 0x8 | path << 1);	
 		odm_write_4byte(dm, 0x1bcc, iqk->tmp1bcc);
@@ -4656,7 +4658,7 @@ void _phy_iq_calibrate_8822c(
 
 	struct dm_iqk_info *iqk_info = &dm->IQK_info;
 
-	if (*dm->mp_mode)
+	if (dm->mp_mode && (*dm->mp_mode))
 		is_mp = true;
 #if 0
 	if (!is_mp)
@@ -4739,7 +4741,7 @@ void _phy_iq_calibrate_by_fw_8822c(
 	struct dm_iqk_info *iqk_info = &dm->IQK_info;
 	enum hal_status status = HAL_STATUS_FAILURE;
 
-	if (*dm->mp_mode)
+	if (dm->mp_mode && (*dm->mp_mode))
 		clear = 0x1;
 	//	else if (dm->is_linked)
 	//		segment_iqk = 0x1;
@@ -4766,7 +4768,7 @@ void phy_iq_calibrate_8822c(
 
 	if (!(rf->rf_supportability & HAL_RF_IQK))
 		return;
-
+	
 	if (dm->mp_mode)	
 		if (*dm->mp_mode)
 		halrf_iqk_hwtx_check(dm, true);

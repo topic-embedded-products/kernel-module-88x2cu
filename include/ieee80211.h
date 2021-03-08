@@ -1659,26 +1659,6 @@ enum rtw_ieee80211_vht_actioncode {
 	RTW_WLAN_ACTION_VHT_OPMODE_NOTIFICATION = 2,
 };
 
-/*IEEE 802.11r action code*/
-#ifdef CONFIG_RTW_80211R
-enum rtw_ieee80211_ft_actioncode {
-	RTW_WLAN_ACTION_FT_RESV,
-	RTW_WLAN_ACTION_FT_REQ,
-	RTW_WLAN_ACTION_FT_RSP,
-	RTW_WLAN_ACTION_FT_CONF,
-	RTW_WLAN_ACTION_FT_ACK,
-	RTW_WLAN_ACTION_FT_MAX,
-};
-#endif
-
-#ifdef CONFIG_RTW_WNM
-enum rtw_ieee80211_wnm_actioncode {
-	RTW_WLAN_ACTION_WNM_BTM_QUERY = 6,
-	RTW_WLAN_ACTION_WNM_BTM_REQ = 7,
-	RTW_WLAN_ACTION_WNM_BTM_RSP = 8,
-};
-#endif
-
 #define OUI_MICROSOFT 0x0050f2 /* Microsoft (also used in Wi-Fi specs)
 				* 00:50:F2 */
 #ifndef PLATFORM_FREEBSD /* Baron BSD has defined */

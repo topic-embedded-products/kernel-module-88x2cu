@@ -88,6 +88,7 @@ CONFIG_RTW_IOT_CCK_PD_INIT = n
 CONFIG_RTW_DISABLE_HW_PDN = n
 # user priority mapping rule : tos, dscp
 CONFIG_RTW_UP_MAPPING_RULE = tos
+CONFIG_RTW_MBO = n
 
 ########################## Android ###########################
 # CONFIG_RTW_ANDROID - 0: no Android, 4/5/6/7/8/9/10 : Android version
@@ -1265,6 +1266,10 @@ ifeq ($(CONFIG_RTW_DISABLE_HW_PDN), y)
 EXTRA_CFLAGS += -DCONFIG_RTW_DISABLE_HW_PDN
 endif
 
+ifeq ($(CONFIG_RTW_IOT_CCK_PD_INIT), y)
+EXTRA_CFLAGS += -DCONFIG_RTW_IOT_CCK_PD_INIT
+endif
+
 ifeq ($(CONFIG_MP_VHT_HW_TX_MODE), y)
 EXTRA_CFLAGS += -DCONFIG_MP_VHT_HW_TX_MODE
 ifeq ($(CONFIG_PLATFORM_I386_PC), y)
@@ -1301,6 +1306,11 @@ ifeq ($(CONFIG_ALIBABA_ZEROCONFIG), y)
 EXTRA_CFLAGS += -DCONFIG_ALIBABA_ZEROCONFIG
 EXTRA_CFLAGS += -DCONFIG_ALIBABA_ZEROCONFIG_DBG
 EXTRA_CFLAGS += -DCONFIG_TDMADIG
+endif
+
+ifeq ($(CONFIG_RTW_MBO), y)
+EXTRA_CFLAGS += -DCONFIG_RTW_MBO -DCONFIG_RTW_80211K -DCONFIG_RTW_WNM -DCONFIG_RTW_BTM_ROAM
+EXTRA_CFLAGS += -DCONFIG_RTW_80211R
 endif
 
 ifeq ($(CONFIG_PLATFORM_I386_PC), y)
@@ -2349,6 +2359,9 @@ rtk_core :=	core/rtw_cmd.o \
 		core/rtw_odm.o \
 		core/rtw_rm.o \
 		core/rtw_rm_fsm.o \
+		core/rtw_ft.o \
+		core/rtw_wnm.o \
+		core/rtw_mbo.o \
 		core/rtw_rm_util.o \
 		core/efuse/rtw_efuse.o 
 

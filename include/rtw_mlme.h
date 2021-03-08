@@ -554,213 +554,6 @@ enum {
 	RTW_ROAM_ACTIVE = BIT2,
 };
 
-#ifdef CONFIG_RTW_80211R
-#define RTW_FT_ACTION_REQ_LMT	4
-#define RTW_FT_MAX_IE_SZ	256
-
-enum _rtw_ft_sta_status {
-	RTW_FT_UNASSOCIATED_STA = 0,
-	RTW_FT_AUTHENTICATING_STA,
-	RTW_FT_AUTHENTICATED_STA,
-	RTW_FT_ASSOCIATING_STA,
-	RTW_FT_ASSOCIATED_STA,
-	RTW_FT_REQUESTING_STA,
-	RTW_FT_REQUESTED_STA,
-	RTW_FT_CONFIRMED_STA,
-	RTW_FT_UNSPECIFIED_STA
-};
-
-#define rtw_ft_chk_status(a, s) \
-	((a)->mlmepriv.ft_roam.ft_status == (s))
-
-#define rtw_ft_roam_status(a, s)	\
-	((rtw_to_roam(a) > 0) && rtw_ft_chk_status(a, s))
-
-#define rtw_ft_authed_sta(a)	\
-	((rtw_ft_chk_status(a, RTW_FT_AUTHENTICATED_STA)) ||	\
-	(rtw_ft_chk_status(a, RTW_FT_ASSOCIATING_STA)) ||	\
-	(rtw_ft_chk_status(a, RTW_FT_ASSOCIATED_STA)))
-
-#define rtw_ft_set_status(a, s) \
-	do { \
-		((a)->mlmepriv.ft_roam.ft_status = (s)); \
-	} while (0)
-
-#define rtw_ft_lock_set_status(a, s, irq) \
-	do { \
-		_enter_critical_bh(&(a)->mlmepriv.lock, ((_irqL *)(irq)));	\
-		((a)->mlmepriv.ft_roam.ft_status = (s));	\
-		_exit_critical_bh(&(a)->mlmepriv.lock, ((_irqL *)(irq)));	\
-	} while (0)
-
-#define rtw_ft_reset_status(a) \
-	do { \
-		((a)->mlmepriv.ft_roam.ft_status = RTW_FT_UNASSOCIATED_STA); \
-	} while (0)
-
-enum rtw_ft_capability {
-	RTW_FT_EN = BIT0,
-	RTW_FT_OTD_EN = BIT1,
-	RTW_FT_PEER_EN = BIT2,
-	RTW_FT_PEER_OTD_EN = BIT3,
-	RTW_FT_BTM_ROAM = BIT4,
-};
-
-#define rtw_ft_chk_flags(a, f) \
-	((a)->mlmepriv.ft_roam.ft_flags & (f))
-
-#define rtw_ft_set_flags(a, f) \
-	do { \
-		((a)->mlmepriv.ft_roam.ft_flags |= (f)); \
-	} while (0)
-
-#define rtw_ft_clr_flags(a, f) \
-	do { \
-		((a)->mlmepriv.ft_roam.ft_flags &= ~(f)); \
-	} while (0)
-
-#define rtw_ft_roam(a)	\
-	((rtw_to_roam(a) > 0) && rtw_ft_chk_flags(a, RTW_FT_PEER_EN))
-	
-#define rtw_ft_valid_akm(a, t)	\
-	((rtw_ft_chk_flags(a, RTW_FT_EN)) && \
-	(((t) == 3) || ((t) == 4)))
-
-#define rtw_ft_roam_expired(a, r)	\
-	((rtw_chk_roam_flags(a, RTW_ROAM_ON_EXPIRED)) \
-	&& (r == WLAN_REASON_ACTIVE_ROAM))
-
-#define rtw_ft_otd_roam_en(a)	\
-	((rtw_ft_chk_flags(a, RTW_FT_OTD_EN))	\
-	&& ((a)->mlmepriv.ft_roam.ft_roam_on_expired == _FALSE)	\
-	&& ((a)->mlmepriv.ft_roam.ft_cap & 0x01))
-	
-#define rtw_ft_otd_roam(a) \
-	rtw_ft_chk_flags(a, RTW_FT_PEER_OTD_EN)
-
-#define rtw_ft_valid_otd_candidate(a, p)	\
-	((rtw_ft_chk_flags(a, RTW_FT_OTD_EN)) 	\
-	&& ((rtw_ft_chk_flags(a, RTW_FT_PEER_OTD_EN)	\
-	&& ((*((p)+4) & 0x01) == 0))	\
-	|| ((rtw_ft_chk_flags(a, RTW_FT_PEER_OTD_EN) == 0)	\
-	&& (*((p)+4) & 0x01))))
-
-struct ft_roam_info {
-	u16	mdid;
-	u8	ft_cap;	
-	/*b0: FT over DS, b1: Resource Req Protocol Cap, b2~b7: Reserved*/
-	u8	updated_ft_ies[RTW_FT_MAX_IE_SZ];
-	u16	updated_ft_ies_len;
-	u8	ft_action[RTW_FT_MAX_IE_SZ];
-	u16	ft_action_len;
-	struct cfg80211_ft_event_params ft_event;
-	u8	ft_roam_on_expired;
-	u8	ft_flags;
-	u32 ft_status;
-	u32 ft_req_retry_cnt;
-	bool ft_updated_bcn;	
-};
-#endif
-
-#ifdef CONFIG_LAYER2_ROAMING
-#if defined(CONFIG_RTW_WNM) || defined(CONFIG_RTW_80211K)
-#define RTW_RRM_NB_RPT_EN		BIT(1)
-#define RTW_MAX_NB_RPT_NUM	8
-
-#define rtw_roam_busy_scan(a, nb)	\
-	(((a)->mlmepriv.LinkDetectInfo.bBusyTraffic == _TRUE) && \
-	(((a)->mlmepriv.ch_cnt) < ((nb)->nb_rpt_ch_list_num)))
-
-#define rtw_wnm_btm_preference_cap(a) \
-	((a)->mlmepriv.nb_info.preference_en == _TRUE)
-
-#define rtw_wnm_btm_diff_bss(a) \
-	((rtw_wnm_btm_preference_cap(a)) && \
-	(is_zero_mac_addr((a)->mlmepriv.nb_info.roam_target_addr) == _FALSE) && \
-	(_rtw_memcmp((a)->mlmepriv.nb_info.roam_target_addr,\
-		(a)->mlmepriv.cur_network.network.MacAddress, ETH_ALEN) == _FALSE))
-
-#define rtw_wnm_btm_roam_candidate(a, c) \
-	((rtw_wnm_btm_preference_cap(a)) && \
-	(is_zero_mac_addr((a)->mlmepriv.nb_info.roam_target_addr) == _FALSE) && \
-	(_rtw_memcmp((a)->mlmepriv.nb_info.roam_target_addr,\
-		(c)->network.MacAddress, ETH_ALEN)))
-
-#define rtw_wnm_set_ext_cap_btm(_pEleStart, _val) \
-	SET_BITS_TO_LE_1BYTE(((u8 *)(_pEleStart))+2, 3, 1, _val)
-
-#define wnm_btm_bss_term_inc(p) (*((u8 *)((p)+3)) & BSS_TERMINATION_INCLUDED)
-
-#define wnm_btm_ess_disassoc_im(p) (*((u8 *)((p)+3)) & ESS_DISASSOC_IMMINENT)
-
-#define wnm_btm_req_mode(p) (*((u8 *)((p)+3)))
-
-#define wnm_btm_disassoc_timer(p) (*((u16 *)((p)+4)))
-
-#define wnm_btm_valid_interval(p) (*((u8 *)((p)+6)))
-
-#define wnm_btm_term_duration_offset(p) ((p)+7)
-
-/*IEEE Std 80211k Figure 7-95b Neighbor Report element format*/
-struct nb_rpt_hdr {
-	u8 id; /*0x34: Neighbor Report Element ID*/
-	u8 len;
-	u8 bssid[ETH_ALEN];
-	u32 bss_info;
-	u8 reg_class;
-	u8 ch_num;
-	u8 phy_type;	
-};
-
-/*IEEE Std 80211v, Figure 7-95e2¡XBSS Termination Duration subelement field format */
-struct btm_term_duration {
-	u8 id;
-	u8 len;
-	u64 tsf;
-	u16 duration;
-};
-
-/*IEEE Std 80211v, Figure 7-101n8¡XBSS Transition Management Request frame body format */
-struct btm_req_hdr {
-	u8 req_mode;
-	u16 disassoc_timer;
-	u8 validity_interval;
-	struct btm_term_duration term_duration;
-};
-
-/*IEEE Std 80211v,  Table 7-43b Optional Subelement IDs for Neighbor Report*/
-/* BSS Transition Candidate Preference */
-#define WNM_BTM_CAND_PREF_SUBEID 0x03
-
-/* BSS Termination Duration */
-#define WNM_BTM_TERM_DUR_SUBEID		0x04
-
-struct wnm_btm_cant {
-	struct nb_rpt_hdr nb_rpt;
-	u8 preference;	/* BSS Transition Candidate Preference */
-};
-
-enum rtw_btm_req_mod {
-	PREFERRED_CANDIDATE_LIST_INCLUDED = BIT0,
-	ABRIDGED = BIT1,
-	DISASSOC_IMMINENT = BIT2,
-	BSS_TERMINATION_INCLUDED = BIT3,
-	ESS_DISASSOC_IMMINENT = BIT4,
-};
-
-struct roam_nb_info {
-	struct nb_rpt_hdr nb_rpt[RTW_MAX_NB_RPT_NUM];
-	struct rtw_ieee80211_channel nb_rpt_ch_list[RTW_MAX_NB_RPT_NUM];
-	bool	nb_rpt_valid;
-	u8	nb_rpt_ch_list_num;
-	u8 preference_en;
-	u8 roam_target_addr[ETH_ALEN];
-	u32	last_nb_rpt_entries;
-	bool	nb_rpt_is_same;
-	_timer roam_scan_timer;
-};
-#endif	/* defined(CONFIG_RTW_WNM) || defined(CONFIG_RTW_80211K) */
-#endif
 
 struct mlme_priv {
 
@@ -988,6 +781,11 @@ struct mlme_priv {
 	u32 wfd_assoc_resp_ie_len;
 #endif
 
+#ifdef CONFIG_RTW_MBO
+	u8 *pcell_data_cap_ie;
+	u32 cell_data_cap_len;
+#endif
+
 #ifdef RTK_DMP_PLATFORM
 	/* DMP kobject_hotplug function  signal need in passive level */
 	_workitem	Linkup_workitem;
@@ -1057,16 +855,6 @@ extern void rtw_wmm_event_callback(PADAPTER padapter, u8 *pbuf);
 #ifdef CONFIG_IEEE80211W
 void rtw_sta_timeout_event_callback(_adapter *adapter, u8 *pbuf);
 #endif /* CONFIG_IEEE80211W */
-#ifdef CONFIG_RTW_80211R
-void rtw_ft_info_init(struct ft_roam_info *pft);
-u8 rtw_ft_chk_roaming_candidate(_adapter *padapter, 
-	struct wlan_network *competitor);
-void rtw_ft_update_stainfo(_adapter *padapter, WLAN_BSSID_EX *pnetwork);
-void rtw_ft_reassoc_event_callback(_adapter *padapter, u8 *pbuf);
-#endif
-#if defined(CONFIG_RTW_WNM) || defined(CONFIG_RTW_80211K)
-void rtw_roam_nb_info_init(_adapter *padapter);
-#endif
 
 thread_return event_thread(thread_context context);
 

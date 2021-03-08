@@ -92,6 +92,15 @@ typedef struct _ADAPTER _adapter, ADAPTER, *PADAPTER;
 #include "../hal/hal_dm.h"
 #include <rtw_qos.h>
 #include <rtw_pwrctrl.h>
+#ifdef CONFIG_RTW_80211R
+#include <rtw_ft.h>
+#endif
+#if defined(CONFIG_RTW_WNM) || defined(CONFIG_RTW_80211K)
+#include <rtw_wnm.h>
+#endif
+#ifdef CONFIG_RTW_MBO
+#include <rtw_mbo.h>
+#endif
 #include <rtw_mlme.h>
 #include <mlme_osdep.h>
 #include <rtw_io.h>
@@ -790,6 +799,9 @@ struct rtw_traffic_statistics {
 #define SEC_CAP_CHK_BMC	BIT0
 #define SEC_CAP_CHK_EXTRA_SEC	BIT1 /* 256 bit */
 
+#define MACID_DROP BIT0
+#define MACID_DROP_INDIRECT BIT1
+
 #define SEC_STATUS_STA_PK_GK_CONFLICT_DIS_BMC_SEARCH	BIT0
 
 struct sec_cam_bmp {
@@ -870,23 +882,31 @@ struct macid_ctl_t {
 	u8 op_num[H2C_MSR_ROLE_MAX]; /* number of macid having h2c_msr's OPMODE = 1 for specific ROLE */
 
 	struct sta_info *sta[MACID_NUM_SW_LIMIT]; /* corresponding stainfo when macid is not shared */
-
+	u8 macid_cap;
 	/* macid sleep registers */
 #ifdef CONFIG_PROTSEL_MACSLEEP
 	u16 reg_sleep_ctrl;
 	u16 reg_sleep_info;
+	u16 reg_drop_ctrl;
+	u16 reg_drop_info;
 #else
 	u16 reg_sleep_m0;
+	u16 reg_drop_m0;
 #if (MACID_NUM_SW_LIMIT > 32)
 	u16 reg_sleep_m1;
+	u16 reg_drop_m1;
 #endif
 #if (MACID_NUM_SW_LIMIT > 64)
 	u16 reg_sleep_m2;
+	u16 reg_drop_m2;
 #endif
 #if (MACID_NUM_SW_LIMIT > 96)
 	u16 reg_sleep_m3;
+	u16 reg_drop_m3;
 #endif
 #endif
+	u16 macid_txrpt;
+	u8 macid_txrpt_pgsz;
 };
 
 /* used for rf_ctl_t.rate_bmp_cck_ofdm */
@@ -948,6 +968,9 @@ struct rf_ctl_t {
 	u8 max_chan_nums;
 	RT_CHANNEL_INFO channel_set[MAX_CHANNEL_NUM];
 	struct p2p_channels channel_list;
+#ifdef CONFIG_RTW_MBO
+	struct npref_ch_rtp ch_rtp;
+#endif
 
 	_mutex offch_mutex;
 	u8 offch_state;

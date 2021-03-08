@@ -1357,45 +1357,6 @@ ssize_t proc_set_roam_tgt_addr(struct file *file, const char __user *buffer, siz
 }
 #endif /* CONFIG_LAYER2_ROAMING */
 
-#ifdef CONFIG_RTW_80211R
-ssize_t proc_set_ft_flags(struct file *file, const char __user *buffer, size_t count, loff_t *pos, void *data)
-{
-	struct net_device *dev = data;
-	_adapter *adapter = (_adapter *)rtw_netdev_priv(dev);
-
-	char tmp[32];
-	u8 flags;
-
-	if (count < 1)
-		return -EFAULT;
-
-	if (count > sizeof(tmp)) {
-		rtw_warn_on(1);
-		return -EFAULT;
-	}
-
-	if (buffer && !copy_from_user(tmp, buffer, count)) {
-		int num = sscanf(tmp, "%hhx", &flags);
-
-		if (num == 1)
-			adapter->mlmepriv.ft_roam.ft_flags = flags;
-	}
-
-	return count;
-
-}
-
-int proc_get_ft_flags(struct seq_file *m, void *v)
-{
-	struct net_device *dev = m->private;
-	_adapter *adapter = (_adapter *)rtw_netdev_priv(dev);
-
-	RTW_PRINT_SEL(m, "0x%02x\n", adapter->mlmepriv.ft_roam.ft_flags);
-
-	return 0;
-}
-#endif
-
 int proc_get_qos_option(struct seq_file *m, void *v)
 {
 	struct net_device *dev = m->private;

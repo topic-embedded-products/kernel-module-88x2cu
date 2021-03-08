@@ -982,42 +982,6 @@ inline u8 rtw_change_bss_chbw_cmd(_adapter *adapter, int flags
 	);
 }
 
-#ifdef CONFIG_RTW_80211R
-static void rtw_ft_validate_akm_type(_adapter  *padapter,
-	struct wlan_network *pnetwork)
-{
-	struct security_priv *psecuritypriv = &(padapter->securitypriv);
-	struct ft_roam_info *pft_roam = &(padapter->mlmepriv.ft_roam);
-	u32 tmp_len;
-	u8 *ptmp;
-
-	/*IEEE802.11-2012 Std. Table 8-101-AKM suite selectors*/
-	if (rtw_ft_valid_akm(padapter, psecuritypriv->rsn_akm_suite_type)) {
-		ptmp = rtw_get_ie(&pnetwork->network.IEs[12], 
-				_MDIE_, &tmp_len, (pnetwork->network.IELength-12));
-		if (ptmp) {
-			pft_roam->mdid = *(u16 *)(ptmp+2);
-			pft_roam->ft_cap = *(ptmp+4);
-
-			RTW_INFO("FT: target " MAC_FMT " mdid=(0x%2x), capacity=(0x%2x)\n", 
-				MAC_ARG(pnetwork->network.MacAddress), pft_roam->mdid, pft_roam->ft_cap);
-			rtw_ft_set_flags(padapter, RTW_FT_PEER_EN);
-
-			if (rtw_ft_otd_roam_en(padapter))
-				rtw_ft_set_flags(padapter, RTW_FT_PEER_OTD_EN);
-		} else {
-			/* Don't use FT roaming if target AP cannot support FT */
-			rtw_ft_clr_flags(padapter, (RTW_FT_PEER_EN|RTW_FT_PEER_OTD_EN));
-			rtw_ft_reset_status(padapter);
-		}
-	} else {
-		/* It could be a non-FT connection */
-		rtw_ft_clr_flags(padapter, (RTW_FT_PEER_EN|RTW_FT_PEER_OTD_EN));
-		rtw_ft_reset_status(padapter);
-	}	
-}
-#endif
-
 u8 rtw_joinbss_cmd(_adapter  *padapter, struct wlan_network *pnetwork)
 {
 	u8	*auth, res = _SUCCESS;
@@ -1658,6 +1622,16 @@ exit:
 
 void free_assoc_resources_hdl(_adapter *padapter, u8 lock_scanned_queue)
 {
+#ifdef CONFIG_SUPPORT_DYNAMIC_TXPWR
+	struct wlan_network *pcur_nw = &(padapter->mlmepriv.cur_network);
+	struct sta_info *psta;
+
+	if ((psta = rtw_get_stainfo(&padapter->stapriv,
+			pcur_nw->network.MacAddress))) {
+			rtw_hal_dtp_macid_set(padapter, 0, psta->cmn.mac_id,
+				pcur_nw->network.MacAddress);
+	}
+#endif
 	rtw_free_assoc_resources(padapter, lock_scanned_queue);
 }
 

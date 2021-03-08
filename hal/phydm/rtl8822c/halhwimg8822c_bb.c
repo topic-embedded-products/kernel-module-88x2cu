@@ -1558,7 +1558,7 @@ odm_read_and_config_mp_8822c_agc_tab(struct dm_struct *dm)
 u32
 odm_get_version_mp_8822c_agc_tab(void)
 {
-		return 47;
+		return 53;
 }
 
 /******************************************************************************
@@ -3015,7 +3015,7 @@ odm_read_and_config_mp_8822c_phy_reg(struct dm_struct *dm)
 u32
 odm_get_version_mp_8822c_phy_reg(void)
 {
-		return 47;
+		return 53;
 }
 
 /******************************************************************************

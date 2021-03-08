@@ -578,7 +578,7 @@ void _halrf_txgapk_write_tx_gain_8822c(
 	struct _halrf_txgapk_info *txgapk = &rf->halrf_txgapk_info;
 
 	u32 i, j, tmp = 0x20, tmp1 = 0x60, tmp_3f;
-	s8 offset_tmp[10] = {0};
+	s8 offset_tmp[11] = {0};
 	u8 channel = *dm->channel, path_idx, band_idx = 1;
 
 	RF_DBG(dm, DBG_RF_TXGAPK, "[TXGAPK] ======>%s\n", __func__);
@@ -602,9 +602,9 @@ void _halrf_txgapk_write_tx_gain_8822c(
 	}
 
 	for (path_idx = RF_PATH_A; path_idx < MAX_PATH_NUM_8822C; path_idx++) {
-		for (i = 0; i < 10; i++) {
+		for (i = 0; i <= 10; i++) {
 			offset_tmp[i] = 0;
-			for (j = i; j < 10; j++) {
+			for (j = i; j <= 10; j++) {
 				if ((((txgapk->txgapk_rf3f_bp[band_idx][j][path_idx] & 0xf00) >> 8) >= 0xc) &&
 					(((txgapk->txgapk_rf3f_bp[band_idx][j][path_idx] & 0xf0) >> 4) >= 0xe))
 					continue;

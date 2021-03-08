@@ -69,6 +69,9 @@
 #ifndef BIT
 	#define BIT(x)	(1 << (x))
 #endif
+#ifndef BIT_ULL
+#define BIT_ULL(x)	(1ULL << (x))
+#endif
 
 #define CHECK_BIT(a, b) (!!((a) & (b)))
 
@@ -597,7 +600,7 @@ static inline int largest_bit_64(u64 bitmask)
 	int i;
 
 	for (i = 63; i >= 0; i--)
-		if (bitmask & BIT(i))
+		if (bitmask & BIT_ULL(i))
 			break;
 
 	return i;

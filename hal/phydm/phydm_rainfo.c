@@ -59,7 +59,8 @@ u8 phydm_legacy_rate_2_spec_rate(void *dm_void, u8 rate)
 				    PHYDM_SPEC_RATE_24M, PHYDM_SPEC_RATE_36M,
 				    PHYDM_SPEC_RATE_48M, PHYDM_SPEC_RATE_54M};
 
-	rate_idx = rate - ODM_RATE6M;
+	if (rate >= ODM_RATE6M && rate <= ODM_RATE54M)
+		rate_idx = rate - ODM_RATE6M;
 	return legacy_spec_rate_t[rate_idx];
 }
 
@@ -137,10 +138,8 @@ void phydm_h2C_debug(void *dm_void, char input[][16], u32 *_used,
 	u8 phydm_h2c_id = 0;
 
 	for (i = 0; i < 8; i++) {
-		if (input[i + 1]) {
-			PHYDM_SSCANF(input[i + 1], DCMD_HEX, &dm_value[i]);
-			input_idx++;
-		}
+		PHYDM_SSCANF(input[i + 1], DCMD_HEX, &dm_value[i]);
+		input_idx++;
 	}
 
 	if (input_idx == 0)
@@ -205,8 +204,7 @@ void phydm_ra_debug(void *dm_void, char input[][16], u32 *_used, char *output,
 	u8 i = 0;
 
 	for (i = 0; i < 5; i++) {
-		if (input[i + 1])
-			PHYDM_SSCANF(input[i + 1], DCMD_DECIMAL, &var[i]);
+		PHYDM_SSCANF(input[i + 1], DCMD_DECIMAL, &var[i]);
 	}
 
 	if ((strcmp(input[1], help) == 0)) {

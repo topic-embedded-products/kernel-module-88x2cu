@@ -1208,6 +1208,19 @@ void update_sta_info_apmode(_adapter *padapter, struct sta_info *psta)
 	_exit_critical_bh(&psta->lock, &irqL);
 }
 
+#ifdef CONFIG_RTW_80211K
+static void update_rm_cap(u8 *frame_head, _adapter *pa, u32 pktlen, int offset)
+{
+	u8 *res;
+	sint len;
+
+	res = rtw_get_ie(frame_head + offset, _EID_RRM_EN_CAP_IE_, &len,
+			 pktlen - offset);
+	if (res != NULL)
+		_rtw_memcpy((void *)pa->rmpriv.rm_en_cap_def, (res + 2), len);
+}
+#endif
+
 static void update_ap_info(_adapter *padapter, struct sta_info *psta)
 {
 	struct mlme_priv *pmlmepriv = &(padapter->mlmepriv);
@@ -1941,6 +1954,7 @@ int rtw_check_beacon_data(_adapter *padapter, u8 *pbuf,  int len)
 	/* ERP Information element */
 	/* Extended supported rates */
 	/* WPA/WPA2 */
+	/* Radio Resource Management */
 	/* Wi-Fi Wireless Multimedia Extensions */
 	/* ht_capab, ht_oper */
 	/* WPS IE */
@@ -2190,6 +2204,12 @@ int rtw_check_beacon_data(_adapter *padapter, u8 *pbuf,  int len)
 		return _FAIL;
 	}
 	psecuritypriv->mfp_opt = mfp_opt;
+
+#ifdef CONFIG_RTW_80211K
+	/* RRM */
+	update_rm_cap(pbuf, padapter, len, _BEACON_IE_OFFSET_);
+
+#endif /* CONFIG_RTW_80211K */
 
 	/* wmm */
 	ie_len = 0;
@@ -3840,8 +3860,6 @@ u8 ap_free_sta(_adapter *padapter, struct sta_info *psta, bool active, u16 reaso
 	psta->htpriv.candidate_tid_bitmap = 0x0;/* reset */
 #endif
 
-	/* clear cam entry / key */
-	rtw_clearstakey_cmd(padapter, psta, enqueue);
 
 
 	_enter_critical_bh(&psta->lock, &irqL);
@@ -3873,7 +3891,10 @@ u8 ap_free_sta(_adapter *padapter, struct sta_info *psta, bool active, u16 reaso
 	beacon_updated = bss_cap_update_on_sta_leave(padapter, psta);
 
 	report_del_sta_event(padapter, psta->cmn.mac_addr, reason, enqueue, _FALSE);
-
+	
+	/* clear cam entry / key */
+	rtw_clearstakey_cmd(padapter, psta, enqueue);
+	
 	return beacon_updated;
 
 }
@@ -4398,7 +4419,7 @@ static u8 rtw_ap_update_chbw_by_ifbmp(struct dvobj_priv *dvobj, u8 ifbmp
 	int i;
 
 	for (i = 0; i < dvobj->iface_nums; i++) {
-		if (!(ifbmp & BIT(i)) || !dvobj->padapters)
+		if (!(ifbmp & BIT(i)) || (dvobj->padapters == NULL))
 			continue;
 
 		iface = dvobj->padapters[i];
@@ -4418,7 +4439,7 @@ static u8 rtw_ap_update_chbw_by_ifbmp(struct dvobj_priv *dvobj, u8 ifbmp
 	}
 
 	for (i = 0; i < dvobj->iface_nums; i++) {
-		if (!(ifbmp & BIT(i)) || !dvobj->padapters)
+		if (!(ifbmp & BIT(i)) || (dvobj->padapters == NULL))
 			continue;
 
 		iface = dvobj->padapters[i];

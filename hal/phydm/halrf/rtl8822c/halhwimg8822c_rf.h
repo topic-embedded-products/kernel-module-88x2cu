@@ -32,6 +32,7 @@
  * into driver source code to reduce code size if necessary.
  * #define CONFIG_8822C_DRV_DIS
  * #define CONFIG_8822CTSSI_DRV_DIS
+ * #define CONFIG_8822C_TYPE5_DRV_DIS
  */
 
 #define CONFIG_8822C
@@ -42,6 +43,11 @@
 #define CONFIG_8822CTSSI
 #ifdef CONFIG_8822CTSSI_DRV_DIS
     #undef CONFIG_8822CTSSI
+#endif
+
+#define CONFIG_8822C_TYPE5
+#ifdef CONFIG_8822C_TYPE5_DRV_DIS
+    #undef CONFIG_8822C_TYPE5
 #endif
 
 /******************************************************************************
@@ -88,6 +94,15 @@ u32 odm_get_version_mp_8822c_txpowertracktssi(void);
 void
 odm_read_and_config_mp_8822c_txpwr_lmt(struct dm_struct *dm);
 u32 odm_get_version_mp_8822c_txpwr_lmt(void);
+
+/******************************************************************************
+ *                           txpwr_lmt_type5.TXT
+ ******************************************************************************/
+
+/* tc: Test Chip, mp: mp Chip*/
+void
+odm_read_and_config_mp_8822c_txpwr_lmt_type5(struct dm_struct *dm);
+u32 odm_get_version_mp_8822c_txpwr_lmt_type5(void);
 
 #endif
 #endif /* end of HWIMG_SUPPORT*/

@@ -1421,6 +1421,24 @@ phydm_tx_dfir_setting_8822c(struct dm_struct *dm, u8 central_ch)
 }
 
 __odm_func__
+void phydm_set_dis_dpd_by_rate_8822c(struct dm_struct *dm, u16 bitmask)
+{
+	/* bit(0) : ofdm 6m*/
+	/* bit(1) : ofdm 9m*/
+	/* bit(2) : ht mcs0*/
+	/* bit(3) : ht mcs1*/
+	/* bit(4) : ht mcs8*/
+	/* bit(5) : ht mcs9*/
+	/* bit(6) : vht 1ss mcs0*/
+	/* bit(7) : vht 1ss mcs1*/
+	/* bit(8) : vht 2ss mcs0*/
+	/* bit(9) : vht 2ss mcs1*/
+
+	odm_set_bb_reg(dm, R_0xa70, 0x3ff, bitmask);
+	dm->dis_dpd_rate = bitmask;
+}
+
+__odm_func__
 boolean
 config_phydm_switch_channel_8822c(struct dm_struct *dm, u8 central_ch)
 {
@@ -1431,6 +1449,7 @@ config_phydm_switch_channel_8822c(struct dm_struct *dm, u8 central_ch)
 	enum bb_path tx = BB_PATH_NON;
 	enum bb_path rx = BB_PATH_NON;
 	u8 rfe_type = dm->rfe_type;
+	struct phydm_iot_center	*iot_table = &dm->iot_table;
 
 	PHYDM_DBG(dm, ODM_PHY_CONFIG, "%s ======>\n", __func__);
 
@@ -1560,6 +1579,13 @@ config_phydm_switch_channel_8822c(struct dm_struct *dm, u8 central_ch)
 			else
 				phydm_rfe_8822c(dm, BB_PATH_AB);
 		}
+	}
+
+	if (iot_table->patch_id_011f0500) {
+		if (central_ch != 1 && dm->en_dis_dpd)
+			phydm_set_dis_dpd_by_rate_8822c(dm, 0x3ff);
+		else
+			phydm_set_dis_dpd_by_rate_8822c(dm, 0x0);
 	}
 	/*====================================================================*/
 
@@ -1939,24 +1965,6 @@ u16 phydm_get_dis_dpd_by_rate_8822c(struct dm_struct *dm)
 	dis_dpd_rate = dm->dis_dpd_rate;
 
 	return dis_dpd_rate;
-}
-
-__odm_func__
-void phydm_set_dis_dpd_by_rate_8822c(struct dm_struct *dm, u16 bitmask)
-{
-	/* bit(0) : ofdm 6m*/
-	/* bit(1) : ofdm 9m*/
-	/* bit(2) : ht mcs0*/
-	/* bit(3) : ht mcs1*/
-	/* bit(4) : ht mcs8*/
-	/* bit(5) : ht mcs9*/
-	/* bit(6) : vht 1ss mcs0*/
-	/* bit(7) : vht 1ss mcs1*/
-	/* bit(8) : vht 2ss mcs0*/
-	/* bit(9) : vht 2ss mcs1*/
-
-	odm_set_bb_reg(dm, R_0xa70, 0x3ff, bitmask);
-	dm->dis_dpd_rate = bitmask;
 }
 
 __odm_func__
